@@ -1,0 +1,1 @@
+In standard API MVC architecture, the 'Views' comprise the serialized JSON responses. This directory ensures strict structural mapping and is reserved for Notification Templates, PDF Generators, or Data Transfer Object (DTO) formatters.
