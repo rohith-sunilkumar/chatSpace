@@ -149,15 +149,7 @@ const ChatArea = () => {
                 ? { content: content.trim(), receiverId: activeDMUser._id }
                 : { content: content.trim(), channelId: activeChannel._id };
 
-            const { data } = await axios.post(endpoint, payload);
-
-            if (socket) {
-                if (isDM) {
-                    socket.emit('send_dm', { senderId: user._id, receiverId: activeDMUser._id, message: data });
-                } else {
-                    socket.emit('send_message', { channelId: activeChannel._id, message: data });
-                }
-            }
+            await axios.post(endpoint, payload);
             setContent('');
         } catch (err) {
             console.error('Failed to send message', err);
@@ -229,19 +221,21 @@ const ChatArea = () => {
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-surface">
-            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between">
-                <h2 className="text-[1.1rem] font-bold flex items-center gap-1"><span className="text-muted">{headerPrefix}</span> {headerTitle}</h2>
+        <div className="flex-1 flex flex-col h-full bg-surface min-w-0">
+            <div className="px-4 md:px-6 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
+                <h2 className="text-[1rem] md:text-[1.1rem] font-bold flex items-center gap-1 truncate">
+                    <span className="text-muted">{headerPrefix}</span> {headerTitle}
+                </h2>
             </div>
 
-            <div className="flex-1 px-6 py-4 overflow-y-auto flex flex-col gap-4" ref={chatMessagesRef} onScroll={checkScroll}>
+            <div className="flex-1 px-4 md:px-6 py-4 overflow-y-auto flex flex-col gap-4" ref={chatMessagesRef} onScroll={checkScroll}>
                 {messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center text-secondary">
-                        <div className="text-4xl mb-3">💬</div>
-                        <h3 className="text-xl font-bold text-primary mb-1">
+                    <div className="flex-1 flex flex-col items-center justify-center text-center text-secondary p-4">
+                        <div className="text-3xl md:text-4xl mb-3">💬</div>
+                        <h3 className="text-lg md:text-xl font-bold text-primary mb-1 line-clamp-1">
                             {isDM ? `Chat with ${headerTitle}` : `Welcome to #${headerTitle}!`}
                         </h3>
-                        {isDM ? <p>This is the start of your direct message history.</p> : <p>This is the start of the channel.</p>}
+                        {isDM ? <p className="text-sm">This is the start of your direct messages.</p> : <p className="text-sm">This is the start of the channel.</p>}
                     </div>
                 ) : (
                     messages.map((msg, i) => {
@@ -255,19 +249,19 @@ const ChatArea = () => {
                         const hasReacted = (usersArray) => usersArray.some((id) => id === user._id);
 
                         return (
-                            <div key={msg._id} className={`relative group flex gap-3 ${isConsecutive ? 'mt-[-0.5rem]' : ''}`}>
+                            <div key={msg._id} className={`relative group flex gap-2 md:gap-3 ${isConsecutive ? 'mt-[-0.5rem]' : ''}`}>
                                 {!isConsecutive && (
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 text-white flex items-center justify-center font-bold text-lg shadow-md shrink-0">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-gradient-to-r from-purple-500 to-cyan-500 text-white flex items-center justify-center font-bold text-sm md:text-lg shadow-md shrink-0">
                                         {msg.senderId?.name?.charAt(0).toUpperCase()}
                                     </div>
                                 )}
-                                {isConsecutive && <div className="w-10 h-10 shrink-0 opacity-0" />}
+                                {isConsecutive && <div className="w-8 h-8 md:w-10 md:h-10 shrink-0 opacity-0" />}
 
                                 <div className="flex-1 min-w-0">
                                     {!isConsecutive && (
-                                        <div className="flex items-baseline gap-2 mb-1">
-                                            <span className="font-bold text-[0.95rem] text-primary">{msg.senderId?.name}</span>
-                                            <span className="text-[0.7rem] text-muted">
+                                        <div className="flex items-baseline gap-2 mb-0.5 md:mb-1">
+                                            <span className="font-bold text-[0.85rem] md:text-[0.95rem] text-primary truncate max-w-[120px] md:max-w-none">{msg.senderId?.name}</span>
+                                            <span className="text-[0.65rem] md:text-[0.7rem] text-muted whitespace-nowrap">
                                                 {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
@@ -275,7 +269,7 @@ const ChatArea = () => {
 
                                     {/* Edit Mode vs Normal View */}
                                     {editingMsgId === msg._id ? (
-                                        <div className="flex gap-2 mt-1">
+                                        <div className="flex flex-col sm:flex-row gap-2 mt-1">
                                             <input
                                                 type="text"
                                                 value={editContent}
@@ -285,31 +279,33 @@ const ChatArea = () => {
                                                     if (e.key === 'Escape') setEditingMsgId(null);
                                                 }}
                                                 autoFocus
-                                                className="flex-1 bg-elevated border border-white/10 rounded-lg py-1.5 px-3 text-primary outline-none focus:border-purple focus:ring-1 focus:ring-purple"
+                                                className="flex-1 bg-elevated border border-white/10 rounded-lg py-1.5 px-3 text-primary outline-none focus:border-purple focus:ring-1 focus:ring-purple text-sm"
                                             />
-                                            <button className="bg-purple text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:brightness-110 cursor-pointer" onClick={() => handleEditSubmit(msg._id)}>Save</button>
-                                            <button className="bg-transparent border border-white/10 text-secondary px-3 py-1.5 rounded-lg text-sm font-medium hover:text-primary cursor-pointer transition-colors" onClick={() => setEditingMsgId(null)}>Cancel</button>
+                                            <div className="flex gap-2">
+                                                <button className="flex-1 sm:flex-none bg-purple text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:brightness-110 cursor-pointer" onClick={() => handleEditSubmit(msg._id)}>Save</button>
+                                                <button className="flex-1 sm:flex-none bg-transparent border border-white/10 text-secondary px-3 py-1.5 rounded-lg text-xs font-medium hover:text-primary cursor-pointer transition-colors" onClick={() => setEditingMsgId(null)}>Cancel</button>
+                                            </div>
                                         </div>
                                     ) : (
-                                        <div className="text-[0.95rem] text-primary/90 leading-relaxed whitespace-pre-wrap">
+                                        <div className="text-[0.9rem] md:text-[0.95rem] text-primary/90 leading-relaxed whitespace-pre-wrap break-words">
                                             {msg.content}
-                                            {msg.isEdited && <span className="text-[0.7rem] text-muted ml-2 italic">(edited)</span>}
+                                            {msg.isEdited && <span className="text-[0.65rem] md:text-[0.7rem] text-muted ml-2 italic">(edited)</span>}
                                         </div>
                                     )}
 
                                     {/* Reactions List display */}
                                     {msg.reactions && msg.reactions.length > 0 && (
-                                        <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                        <div className="flex flex-wrap gap-1 mt-1.5">
                                             {msg.reactions.map((r) => (
                                                 <div
                                                     key={r.emoji}
-                                                    className={`border rounded-full px-2 py-0.5 text-[0.75rem] flex items-center gap-1.5 cursor-pointer select-none transition-all ${hasReacted(r.users)
+                                                    className={`border rounded-full px-2 py-0.5 text-[0.7rem] flex items-center gap-1 cursor-pointer select-none transition-all ${hasReacted(r.users)
                                                         ? 'bg-purple-light/15 border-purple-light/30 text-purple-light hover:bg-purple-light/25'
                                                         : 'bg-white/5 border-white/10 text-secondary hover:bg-white/10 hover:border-white/20 hover:text-primary'
                                                         }`}
                                                     onClick={() => handleReactToggle(msg._id, r.emoji)}
                                                 >
-                                                    {r.emoji} <span className="font-semibold text-[0.7rem]">{r.users.length}</span>
+                                                    {r.emoji} <span className="font-semibold text-[0.65rem]">{r.users.length}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -317,23 +313,23 @@ const ChatArea = () => {
                                 </div>
 
                                 {/* Hover Actions Menu */}
-                                <div className="absolute right-4 -top-4 bg-card border border-white/5 rounded-lg p-1 hidden group-hover:flex gap-1 shadow-lg items-center z-10 transition-all">
+                                <div className="absolute right-0 md:right-4 -top-8 bg-card border border-white/5 rounded-lg p-1 hidden group-hover:flex gap-0.5 md:gap-1 shadow-lg items-center z-10 transition-all">
                                     {reactingMsgId === msg._id ? (
-                                        <div className="flex gap-1">
+                                        <div className="flex gap-0.5 md:gap-1 p-0.5">
                                             {EMOJIS.map(emoji => (
-                                                <button key={emoji} className="bg-transparent border-none text-[1rem] cursor-pointer p-0.5 hover:scale-125 transition-transform" onClick={() => handleReactToggle(msg._id, emoji)}>
+                                                <button key={emoji} className="bg-transparent border-none text-[0.9rem] md:text-[1rem] cursor-pointer p-0.5 hover:scale-125 transition-transform" onClick={() => handleReactToggle(msg._id, emoji)}>
                                                     {emoji}
                                                 </button>
                                             ))}
                                         </div>
                                     ) : (
-                                        <button className="bg-transparent border-none text-[0.85rem] text-secondary hover:text-primary transition-colors cursor-pointer p-1 rounded hover:bg-white/5" title="React" onClick={() => setReactingMsgId(msg._id)}>😊</button>
+                                        <button className="bg-transparent border-none text-[0.8rem] md:text-[0.85rem] text-secondary hover:text-primary transition-colors cursor-pointer p-1 rounded hover:bg-white/5" title="React" onClick={() => setReactingMsgId(msg._id)}>😊</button>
                                     )}
 
                                     {isOwner && (
                                         <>
                                             <button
-                                                className="bg-transparent border-none text-[0.85rem] text-secondary hover:text-primary transition-colors cursor-pointer p-1 rounded hover:bg-white/5"
+                                                className="bg-transparent border-none text-[0.8rem] md:text-[0.85rem] text-secondary hover:text-primary transition-colors cursor-pointer p-1 rounded hover:bg-white/5"
                                                 title="Edit"
                                                 onClick={() => {
                                                     setEditingMsgId(msg._id);
@@ -343,7 +339,7 @@ const ChatArea = () => {
                                                 ✎
                                             </button>
                                             <button
-                                                className="bg-transparent border-none text-[0.85rem] text-secondary hover:text-red transition-colors cursor-pointer p-1 rounded hover:bg-white/5"
+                                                className="bg-transparent border-none text-[0.8rem] md:text-[0.85rem] text-secondary hover:text-red transition-colors cursor-pointer p-1 rounded hover:bg-white/5"
                                                 title="Delete"
                                                 onClick={() => handleDeleteClick(msg._id)}
                                             >
@@ -359,21 +355,21 @@ const ChatArea = () => {
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="px-6 py-1 text-[0.8rem] text-muted italic h-[28px] flex items-center">
-                {typingText()}
+            <div className="px-4 md:px-6 py-1 text-[0.75rem] text-muted italic h-[24px] flex items-center overflow-hidden">
+                <span className="truncate">{typingText()}</span>
             </div>
 
-            <div className="p-6 pt-0">
-                <form onSubmit={handleSendMessage} className="flex items-end gap-3 bg-elevated border border-white/10 rounded-[14px] p-2 focus-within:border-purple focus-within:ring-1 focus-within:ring-purple transition-all shadow-inner">
+            <div className="p-4 md:p-6 pt-0 shrink-0">
+                <form onSubmit={handleSendMessage} className="flex items-end gap-2 md:gap-3 bg-elevated border border-white/10 rounded-xl md:rounded-[14px] p-1.5 md:p-2 focus-within:border-purple focus-within:ring-1 focus-within:ring-purple transition-all shadow-inner">
                     <input
                         type="text"
                         placeholder={`Message ${headerPrefix}${headerTitle}`}
                         value={content}
                         onChange={handleInputChange}
-                        className="flex-1 bg-transparent border-none text-primary px-3 py-2 outline-none placeholder:text-muted resize-none text-[0.95rem]"
+                        className="flex-1 bg-transparent border-none text-primary px-2 md:px-3 py-1.5 md:py-2 outline-none placeholder:text-muted resize-none text-[0.9rem] md:text-[0.95rem]"
                         autoFocus
                     />
-                    <button type="submit" className="w-[38px] h-[38px] shrink-0 rounded-lg border-none bg-purple text-white flex items-center justify-center cursor-pointer transition-all hover:brightness-110 disabled:bg-white/5 disabled:text-muted disabled:cursor-not-allowed mx-1 my-0.5" disabled={!content.trim()}>
+                    <button type="submit" className="w-[34px] h-[34px] md:w-[38px] md:h-[38px] shrink-0 rounded-lg border-none bg-purple text-white flex items-center justify-center cursor-pointer transition-all hover:brightness-110 disabled:bg-white/5 disabled:text-muted disabled:cursor-not-allowed m-0.5" disabled={!content.trim()}>
                         ➤
                     </button>
                 </form>

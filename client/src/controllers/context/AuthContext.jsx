@@ -1,21 +1,47 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
+// Helper to get cookie by name
+const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
+
+// Helper to set cookie
+const setCookie = (name, value, days) => {
+    let expires = "";
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Strict";
+};
+
+// Helper to delete cookie
+const deleteCookie = (name) => {
+    document.cookie = name + '=; Max-Age=-99999999; path=/; SameSite=Strict';
+};
+
+axios.defaults.withCredentials = true;
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(() => localStorage.getItem('token'));
+    const [token, setToken] = useState(() => getCookie('token'));
     const [loading, setLoading] = useState(true);
 
     // Set axios default auth header whenever token changes
     useEffect(() => {
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            localStorage.setItem('token', token);
+            setCookie('token', token, 7);
         } else {
             delete axios.defaults.headers.common['Authorization'];
-            localStorage.removeItem('token');
+            deleteCookie('token');
         }
     }, [token]);
 

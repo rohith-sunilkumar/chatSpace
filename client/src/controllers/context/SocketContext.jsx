@@ -11,12 +11,13 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
         // Only connect if user is authenticated
         if (user) {
-            const socketInstance = io(
-                import.meta.env.VITE_API_URL || 'https://chatspace-0rrm.onrender.com',
-                {
-                    withCredentials: true,
-                }
-            );
+            const apiUrl = import.meta.env.VITE_API_URL ||
+                (window.location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://chatspace-0rrm.onrender.com');
+
+            const socketInstance = io(apiUrl, {
+                withCredentials: true,
+                transports: ['websocket', 'polling'], // Ensure fallback for better reliability
+            });
 
             setSocket(socketInstance);
 

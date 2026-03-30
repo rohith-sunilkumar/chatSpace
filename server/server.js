@@ -12,6 +12,7 @@ import userRoutes from './routes/userRoutes.js';
 import workspaceRoutes from './routes/workspaceRoutes.js';
 import channelRoutes from './routes/channelRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
+import cookieParser from 'cookie-parser';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -80,6 +81,7 @@ io.on('connection', (socket) => {
 // ── Body Parsing ───────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // ── Routes ─────────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);

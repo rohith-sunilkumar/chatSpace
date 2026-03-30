@@ -29,11 +29,21 @@ const register = async (req, res) => {
     const user = await User.create({ name, email, password });
 
     if (user) {
+        const token = generateToken(user._id);
+
+        // Set cookie
+        res.cookie('token', token, {
+            httpOnly: false, // Set to true for better security if front-end doesn't need to read it
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (matches JWT_EXPIRES_IN)
+        });
+
         res.status(201).json({
             _id: user._id,
             name: user.name,
             email: user.email,
-            token: generateToken(user._id),
+            token,
         });
     } else {
         res.status(400);
@@ -67,11 +77,21 @@ const login = async (req, res) => {
         throw new Error('Invalid email or password');
     }
 
+    const token = generateToken(user._id);
+
+    // Set cookie
+    res.cookie('token', token, {
+        httpOnly: false, // Set to true for better security if front-end doesn't need to read it
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(200).json({
         _id: user._id,
         name: user.name,
         email: user.email,
-        token: generateToken(user._id),
+        token,
     });
 };
 

@@ -39,6 +39,15 @@ const sendMessage = async (req, res) => {
     });
 
     const populated = await msg.populate('senderId', 'name email');
+
+    // Emit socket event
+    if (channelId) {
+        io.to(channelId.toString()).emit('receive_message', populated);
+    } else if (receiverId) {
+        const roomId = [req.user._id.toString(), receiverId.toString()].sort().join('_');
+        io.to(roomId).emit('receive_dm', populated);
+    }
+
     res.status(201).json(populated);
 };
 
@@ -200,6 +209,11 @@ const sendDM = async (req, res) => {
     });
 
     const populated = await msg.populate('senderId', 'name email');
+
+    // Emit socket event
+    const roomId = [req.user._id.toString(), receiverId.toString()].sort().join('_');
+    io.to(roomId).emit('receive_dm', populated);
+
     res.status(201).json(populated);
 };
 

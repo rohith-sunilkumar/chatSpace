@@ -4,7 +4,7 @@ import { useAuth } from '../../controllers/context/AuthContext';
 import WorkspaceModal from './WorkspaceModal';
 import CreateChannelModal from './CreateChannelModal';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
     const { user, logout } = useAuth();
     const {
         workspaces,
@@ -37,9 +37,29 @@ const Sidebar = () => {
         }
     }, [activeWorkspace?._id]); // eslint-disable-line
 
+    const handleSelectWorkspace = (ws) => {
+        selectWorkspace(ws);
+        if (window.innerWidth < 768) onClose();
+    };
+
+    const handleSelectChannel = (ch) => {
+        selectChannel(ch);
+        if (window.innerWidth < 768) onClose();
+    };
+
+    const handleSelectDMUser = (u) => {
+        selectDMUser(u);
+        if (window.innerWidth < 768) onClose();
+    };
+
     return (
         <>
-            <aside className="w-[320px] shrink-0 bg-base border-r border-white/5 flex h-full">
+            <aside className={`
+                fixed md:relative inset-y-0 left-0 w-[300px] md:w-[320px] 
+                bg-base border-r border-white/5 flex h-full z-40 
+                transition-transform duration-300 ease-in-out
+                ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            `}>
                 {/* ── Workspace Rail (left column) ── */}
                 <div className="w-[68px] bg-[#050508] border-r border-white/5 flex flex-col items-center py-4 justify-between shrink-0 z-10">
                     <div className="flex flex-col gap-3 w-full items-center">
@@ -50,7 +70,7 @@ const Sidebar = () => {
                                     ? 'bg-purple text-white shadow-[0_0_15px_rgba(139,92,246,0.5)] !rounded-xl'
                                     : 'bg-white/5 text-secondary hover:rounded-xl hover:bg-white/10 hover:text-primary'
                                     }`}
-                                onClick={() => selectWorkspace(ws)}
+                                onClick={() => handleSelectWorkspace(ws)}
                                 title={ws.name}
                             >
                                 {ws.name.charAt(0).toUpperCase()}
@@ -96,7 +116,7 @@ const Sidebar = () => {
                                                 ? 'bg-white/5 text-primary border-white/10 shadow-sm'
                                                 : 'text-secondary border-transparent hover:bg-white/5 hover:text-primary'
                                                 }`}
-                                            onClick={() => selectChannel(ch)}
+                                            onClick={() => handleSelectChannel(ch)}
                                         >
                                             <span className="text-muted mr-1.5 font-normal">#</span> {ch.name}
                                         </button>
@@ -123,7 +143,7 @@ const Sidebar = () => {
                                                 ? 'bg-white/5 text-primary border-white/10 shadow-sm'
                                                 : 'text-secondary border-transparent hover:bg-white/5 hover:text-primary'
                                                 }`}
-                                            onClick={() => selectDMUser(u)}
+                                            onClick={() => handleSelectDMUser(u)}
                                         >
                                             <span className="w-5 h-5 rounded-md bg-gradient-to-r from-purple-500 to-cyan-500 text-white flex items-center justify-center text-[0.6rem] font-bold mr-2">{u.name.charAt(0).toUpperCase()}</span>
                                             <span className="truncate">{u.name}</span>
