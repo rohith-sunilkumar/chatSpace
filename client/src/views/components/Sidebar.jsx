@@ -57,11 +57,11 @@ const Sidebar = ({ isOpen, onClose }) => {
             <aside className={`
                 fixed md:relative inset-y-0 left-0 w-[300px] md:w-[320px] 
                 bg-base border-r border-white/5 flex h-full z-40 
-                transition-transform duration-300 ease-in-out
+                transition-transform duration-300 ease-in-out shrink-0 overflow-hidden
                 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
                 {/* ── Workspace Rail (left column) ── */}
-                <div className="w-[68px] bg-[#050508] border-r border-white/5 flex flex-col items-center py-4 justify-between shrink-0 z-10">
+                <div className="w-[68px] bg-[#050508] border-r border-white/5 flex flex-col items-center py-4 justify-between shrink-0 h-full">
                     <div className="flex flex-col gap-3 w-full items-center">
                         {workspaces.map((ws) => (
                             <button
