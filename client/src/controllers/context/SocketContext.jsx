@@ -12,7 +12,7 @@ export const SocketProvider = ({ children }) => {
         // Only connect if user is authenticated
         if (user) {
             const socketInstance = io(
-                import.meta.env.VITE_API_URL || 'http://localhost:5000',
+                import.meta.env.VITE_API_URL || 'https://chatspace-0rrm.onrender.com',
                 {
                     withCredentials: true,
                 }
