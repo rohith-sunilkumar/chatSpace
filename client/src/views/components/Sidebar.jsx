@@ -101,9 +101,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                     {activeWorkspace ? (
                         <>
                             <div className="h-16 border-b border-white/5 flex items-center justify-between px-3 md:px-4 sticky top-0 bg-card/80 backdrop-blur z-10 shadow-sm gap-2">
-                                <span className="font-bold text-[0.95rem] md:text-[1.05rem] truncate text-primary">{activeWorkspace.name}</span>
-                                <div className="text-[0.65rem] md:text-[0.7rem] bg-cyan/10 text-cyan border border-cyan/20 px-1.5 md:px-2 py-1 rounded-md flex items-center gap-1 cursor-default shrink-0 min-w-0" title="Invite code">
-                                    <span className="opacity-70">🔗</span> <code className="font-mono font-bold tracking-tight">{activeWorkspace.inviteCode}</code>
+                                <span className="font-bold text-[0.95rem] md:text-[1.05rem] truncate text-primary min-w-0">{activeWorkspace.name}</span>
+                                <div className="text-[0.65rem] md:text-[0.7rem] bg-cyan/10 text-cyan border border-cyan/20 px-1.5 md:px-2 py-1 rounded-md flex items-center gap-1 cursor-default shrink-0" title="Invite code">
+                                    🔗 <code>{activeWorkspace.inviteCode}</code>
                                 </div>
                             </div>
 
